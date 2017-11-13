@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>PUDDING</title>
+</head>
+<body>
+<font size="7">Bidimensional Molecular Dynamics </font>
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<p style="text-align:center">
+
+<table>
+    <tr>
+        <td>
+            <canvas id="canvas" width="600" height="600"
+                    style="border-width: 1px; border-style:solid; background-color:black">
+            </canvas>
+
+        </td>
+        <td style = "vertical-align:top;text-align:center">
+
+
+            <br>
+            Steps per frame (100 fps) = <span id="spfReadout">10</span <span id=ssteps> </span>
+            <div> 1<input id="stepSlider" type="range" min="1" max="200" value="10" oninput="changeSTEPSPS()" onchange="changeSTEPSPS()">200	</div>
+            <br>
+            Step size = <span id="dtReadout">0.02</span> <span id=sstepsize> </span>
+            <div> 0.0001 <input id="dtSlider" type="range" min="0.0001" max="0.04" step="0.0001" value="0.02"  oninput="changedt()" onchange="changedt()"> 0.04 </div>
+            <br>
+            Number of atoms = <span id="nReadout">250</span></  <span id=natoms> </span>
+            <div> 1<input id="NSlider" type="range" min="1" max="1000" value="30" oninput="changeN()" onchange="changeN()">1000	</div>
+        <br>
+        Lattice spacing = <span id="distReadout">2</span></  <span id=lattice> </span>
+    <div> 1 <input id="distSlider" type="range" min="2" max="6" step="0.05" value="4"  oninput="changedist()" onchange="changedist()"> 3 </div>
+    <br>
+    Cutoff distance = <span id="cutoffReadout">3</span></  <span id=lattice> </span>
+<div> 1 <input id="cutoffSlider" type="range" min="1" max="6" step="0.05" value="3"  oninput="changecutoff()" onchange="changecutoff()"> 6 </div>
+
+
+</tr>
+</table>
+
+<div>
+    <input id="startButton" type="button" onclick="ruan()" value="  Start  ">
+    <input id="fastButton" type="button" onclick="speedFactor(1.1)" value="Faster">
+    <input id="slowButton" type="button" onclick="speedFactor(0.9)" value="Slower">
+    <input id="fastButton" type="button" onclick="speedFactor(0)" value="Freeze">
+    <input id="smallButton" type="button" onclick="smaller(0)" value="Smaller!">
+    <input id="bigButton" type="button" onclick="bigger(0)" value="Bigger!">
+</div>
+
+
+
+
+<script>
+
+
+var cores =['#14f214','#9932cc','#ffb90f','#31f6fa','#bf3eff','#1101a0','#14F096','#7ff078','#8ce50','#a0e123',  '#b4230e','#550f90','#e60550','#f550e0','#4f3ce0','#1f5a00','#fe7660','#0256d0','#fdb400','#dfd360','#f0e6f0','#087f00','#8f4508','#14faf4','#3cf56a','#5065a0','#64F096','#769078','#8cee50','#a03340',  '#b40e0e','#c80f90','#e60dff','#f6ffe0','#4f3ce0','#ff5a00','#fe7360','#0f96d0','#fdb4ff','#dfd200','#fff6f0','#ffff00','#82f008','#F0F8FF','#FAEBD7','#00FFFF','#7FFFD4','#F0FFFF','#F5F5DC','#FFE4C4','#00F0F0','#FFEBCD','#0000FF','#8A2BE2','#A52A2A','#DEB887','#5F9EA0','#7FFF00','#D2691E','#FF7F50','#6495ED','#FFF8DC','#DC143C','#00FFFF','#00008B','#008B8B','#B8860B','#A9A9A9','#006400','#BDB76B','#8B008B','#556B2F','#FF8C00','#9932CC','#8B0000','#E9967A','#8FBC8F','#483D8B','#2F4F4F','#00CED1','#9400D3','#FF1493','#00BFFF','#696969','#1E90FF','#B22222','#FFFAF0','#228B22','#FF00FF','#DCDCDC','#F8F8FF','#FFD700','#DAA520','#808080','#008000','#ADFF2F','#F0FFF0','#FF69B4','#CD5C5C','#4B0082','#FFFFF0','#F0E68C','#E6E6FA','#FFF0F5','#7CFC00','#FFFACD','#ADD8E6','#F08080','#E0FFFF','#FAFAD2','#D3D3D3','#90EE90','#FFB6C1','#FFA07A','#20B2AA','#87CEFA','#778899','#B0C4DE','#FFFFE0','#00FF00','#32CD32','#FAF0E6','#FF00FF','#800000','#66CDAA','#0000CD','#BA55D3','#9370DB','#3CB371','#7B68EE','#00FA9A','#48D1CC','#C71585','#191970','#F5FFFA','#FFE4E1','#FFE4B5','#FFDEAD','#000080','#FDF5E6','#808000','#6B8E23','#FFA500','#FF4500','#DA70D6','#EEE8AA','#98FB98','#AFEEEE','#DB7093','#FFEFD5','#FFDAB9','#CD853F','#FFC0CB','#DDA0DD','#B0E0E6','#800080','#FF0000','#BC8F8F','#4169E1','#8B4513','#FA8072','#F4A460','#2E8B57','#FFF5EE','#A0522D','#C0C0C0','#87CEEB','#6A5ACD','#708090','#FFFAFA','#00FF7F','#4682B4','#D2B48C','#008080','#D8BFD8','#FF6347','#40E0D0','#EE82EE','#F5DEB3','#FFFFFF','#F5F5F5','#FFFF00','#9ACD32'];
+//var cores = ['#14f214','#31f6fa','#1101a0','#14F096','#7ff078','#8ce50','#a0e123',  '#b4230e','#550f90','#e60550','#f550e0','#4f3ce0','#1f5a00','#fe7660','#0256d0','#fdb400','#dfd360','#f0e6f0','#087f00','#8f4508','#14faf4','#3cf56a','#5065a0','#64F096','#769078','#8cee50','#a03340',  '#b40e0e','#c80f90','#e60dff','#f6ffe0','#4f3ce0','#ff5a00','#fe7360','#0f96d0','#fdb4ff','#dfd200','#fff6f0','#ffff00','#82f008'];
+var N = 300;								// numero de atomos
+var dt = 0.02;								// timestep
+var dureza = 1550;						// dureza das paredes (potencial repulsivo)
+var cutoff = 3.0;						// cutoff distance
+var cutoff2 = cutoff*cutoff;
+var canvas = document.getElementById('canvas');
+var ctx = document.getElementById("canvas").getContext("2d");
+var radius = 20;							// raio do atomo em pixels
+var csize = canvas.width;
+var largura = canvas.width / radius;	// largura da caixa em raios atomicos
+var spf = 10; // steps per frame
+
+var run = 0;
+
+
+
+//inicializa vetores de posicoes aceleracoes e velocidades
+var x = [0]; for (i=0;i<N;i++) x[i] =0;
+var y = [0]; for (i=0;i<N;i++) y[i] =0;
+var xo = [0]; for (i=0;i<N;i++) xo[i] =0;
+var yo = [0]; for (i=0;i<N;i++) yo[i] =0;
+var vx = [0]; for (i=0;i<N;i++) vx[i] =0;
+var vy = [0]; for (i=0;i<N;i++) vy[i] =0;
+var ax = [0]; for (i=0;i<N;i++) ax[i] =0;
+var ay = [0]; for (i=0;i<N;i++) ay[i] =0;
+
+
+// posiciona os átomos em fileiras inicialmente
+var dist = (distSlider.value)/2;					// distancia entre atomos (medida em raios)
+var distx = dist;
+var disty = dist;
+for (var i=0; i<N; i++) {
+    x[i] = distx; y[i] = disty;
+
+    distx += dist;
+    if (distx > csize/radius - 1) {
+        distx = dist;
+        disty += dist;
+    }
+    if (disty> (largura - 2))
+    N = i;
+}
+
+setInterval("pops()",10); // chama a função que faz alguns passos e desenha a cada 10 ms
+
+function pops() { //faz tantos steps per frame (spf) e desenha
+
+    if (run) {
+        for (var i = 0; i < spf; i++) {
+            passo();
+        }
+    }
+    draw();
+}
+
+
+
+// faz um passo do algoritmo de verlet
+function passo() {
+    for (var i=0; i<N; i++) {
+        x[i] += vx[i]*dt + 0.5*ax[i]*dt*dt;
+        y[i] += vy[i]*dt + 0.5*ay[i]*dt*dt;
+        vx[i] += 0.5*ax[i]*dt;
+        vy[i] += 0.5*ay[i]*dt;
+    }
+    accel();
+    for (var i=0; i<N; i++) {
+        vx[i] += 0.5*ax[i]*dt;
+        vy[i] += 0.5*ay[i]*dt;
+    }
+}
+
+// computa aceleracoes
+function accel() {
+    var dx, dy, dx2, dy2, r2, r2inv, attract, repul, lennard, fx, fy;
+    for (var i = 0; i < N; i++){
+        ax[i] = 0.0;
+        ay[i] = 0;
+    }
+
+    // verifica colisoes com as paredes (potencial de mola)
+    for (var i = 0; i < N; i++) {
+        if (x[i] < 0.5) {
+            ax[i] = dureza * (0.5 - x[i]);
+        } else
+        if (x[i] > (largura - 0.5)) {
+            ax[i] = dureza * (largura - 0.5 - x[i]);
+        }
+        if (y[i] < 0.5) {
+            ay[i] = (dureza * (0.5 - y[i]));
+        } else
+        if (y[i] > (largura - 0.5)) {
+            ay[i] = (dureza * (largura - 0.5 - y[i]));
+        }
+
+    }
+
+    //computa as interacoes com potencial de lennard jones
+    for (var i = 0; i < N; i++) {
+        for (var j = 0; j < i; j++) {
+            dx = x[i] - x[j];
+            dx2 = dx * dx;
+            if (dx2 < cutoff2) {  // ve se a distancia no eixo x é menor que o cutoff
+                dy = y[i] - y[j];
+                dy2 = dy * dy;
+                if (dy2 < cutoff2) {
+                    r2 = dx2 + dy2;
+                    if (r2 < cutoff2) {
+                        r2inv = 1.0 / r2;
+                        attract = r2inv * r2inv * r2inv; //força atrativa proporcional a r^-6
+                        repul = attract * attract; // força repulsiva proporcional a r^-12
+
+                        lennard = 24* ((2* repul) - attract) * r2inv; //faz o potencial de lennar-jones
+                        fx = lennard * dx;
+                        fy = lennard * dy;
+                        ax[i] += fx;  // soma a força a aceleracao da particula (fazendo m = 1 temos f = a e podemos fazer isso)
+                        ay[i] += fy;
+                        ax[j] -= fx;  // e uma forca de sentido oposto na outra particula
+                        ay[j] -= fy;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// limpa o canvas e redesenha
+function draw() {
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, csize, csize);
+
+    for (var i=0; i<N; i++) {
+        //ctx.fillStyle = '#00ff00';
+        ctx.fillStyle = cores[i%179];
+        ctx.beginPath();
+        ctx.arc(x[i] * radius, csize - (y[i] * radius), radius/2, 0, 2*Math.PI); // estamos usando o raio das bolinhas como unidade de distancia
+        ctx.fill();
+    }
+}
+
+// rescala as velocidade em funcoa do botao apertado
+function speedFactor(factor) {
+    for (var i=0; i<N; i++) {
+        vx[i] *= factor;
+        vy[i] *= factor;
+    }
+}
+
+function smaller() {
+    if (radius > 2)
+    {
+        radius-- ;
+    largura = canvas.width / radius;	// largura da caixa em raios atomicos
+    }
+}
+
+function bigger() {
+    if (radius < 60) {
+        radius++;
+        largura = canvas.width / radius;	// largura da caixa em raios atomicos
+    }
+}
+// funcao start/pause
+function ruan() {
+    run = !run;
+    if (run) {
+        startButton.value = " Pause ";
+
+    } else {
+        startButton.value = "Go";
+    }
+}
+
+
+//funcao para tirar as coordenadas do mouse ao clicar no canvas (roubei da internet)
+document.addEventListener("DOMContentLoaded", init, false);
+
+function init()
+{
+    var canvas = document.getElementById("canvas");
+    canvas.addEventListener("mousedown", getPosition, false);
+}
+
+//tentativa de implementar funcao para adicionar átomos com clique
+function getPosition(event) //funcao para tirar as coordenadas do mouse ao clicar no canvas (roubei da internet)
+{
+    var x = new Number();
+    var y = new Number();
+    var canvas = document.getElementById("canvas");
+
+    if (event.x != undefined && event.y != undefined)
+    {
+        x = event.x;
+        y = event.y;
+    }
+    else // Firefox method to get the position
+    {
+        x = event.clientX + document.body.scrollLeft +
+                document.documentElement.scrollLeft;
+        y = event.clientY + document.body.scrollTop +
+                document.documentElement.scrollTop;
+    }
+
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+    /*
+     var noatom = 1;
+     if (run) {
+     for (var i = 0; i < N; i++) {
+     if ((Math.abs(x - x[i]) < radius) && (Math.abs(y - y[i]) < radius))
+     noatom = 0;
+     else {
+     N = N + 1;
+     x[N] = x;
+     y [N] = y;
+     vx [N] = 0;
+     vy [N] = 0;
+     ax [N] = 0;
+     ay [N] = 0;
+
+     }
+
+
+     }
+     }
+     */
+    alert("x: " + x + "  y: " + y);
+}
+function changeSTEPSPS(){ //funcao para mudar a quantidade de passsos por quadro
+
+    spf = Number(stepSlider.value);
+    spfReadout.innerHTML = spf;
+}
+
+function changedt(){ //funcao para mudar o passo de tempo
+
+    dt = (dtSlider.value);
+    dtReadout.innerHTML = dt;
+}
+
+function changecutoff()
+{
+    cutoff = (cutoffSlider.value);
+    cutoffReadout.innerHTML = cutoff;
+    cutoff2 = cutoff*cutoff;
+
+}
+
+
+function changedist()
+{
+    dist = (distSlider.value)/2;
+    distReadout.innerHTML = dist;
+
+    //var dist = 3;					// distancia entre atomos (medida em raios)
+     distx = dist;
+     disty = dist;
+    for (var i=0; i<N; i++) {
+        x[i] = distx; y[i] = disty;
+
+        distx += dist;
+        if (distx > csize/radius - 1) {
+            distx = dist;
+            disty += dist;
+        }
+        if (disty> (largura - 2))
+            N = i;
+    }
+
+}
+
+function changeN()
+{
+    if (!run)
+    {
+        var newN = NSlider.value;
+
+         N = newN;								// numero de atomos
+        nReadout.innerHTML = N;
+
+
+//inicializa vetores de posicoes aceleracoes e velocidades
+         x = [0]; for (i=0;i<N;i++) x[i] =0;
+         y = [0]; for (i=0;i<N;i++) y[i] =0;
+         xo = [0]; for (i=0;i<N;i++) xo[i] =0;
+         yo = [0]; for (i=0;i<N;i++) yo[i] =0;
+         vx = [0]; for (i=0;i<N;i++) vx[i] =0;
+         vy = [0]; for (i=0;i<N;i++) vy[i] =0;
+         ax = [0]; for (i=0;i<N;i++) ax[i] =0;
+         ay = [0]; for (i=0;i<N;i++) ay[i] =0;
+
+
+// posiciona os átomos em fileiras inicialmente
+         					// distancia entre atomos (medida em raios)
+         distx = dist;
+         disty = dist;
+        for (var i=0; i<N; i++) {
+            x[i] = distx; y[i] = disty;
+
+            distx += dist;
+            if (distx > csize/radius - 1) {
+                distx = dist;
+                disty += dist;
+            }
+            if (disty> (largura - 2))
+                N = i;
+        }
+
+    }
+
+}
+
+
+</script>
+
+</body></html>
