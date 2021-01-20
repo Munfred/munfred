@@ -1,2 +1,2 @@
-# munfred
-Content for www.munfred.com
+# Hi, I'm Eduardo
+For more information see www.munfred.com
